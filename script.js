@@ -1,6 +1,3 @@
-// Add the Make.com webhook URL here when the scenario is ready.
-const MAKE_WEBHOOK_URL = "PASTE_YOUR_MAKE_WEBHOOK_URL_HERE";
-
 const menuToggle = document.querySelector('.menu-toggle');
 const navMenu = document.querySelector('.nav-menu');
 
@@ -47,23 +44,6 @@ const statsObserver = new IntersectionObserver((entries, observer) => {
 }, { threshold: 0.7 });
 stats.forEach((stat) => statsObserver.observe(stat));
 
-const amountButtons = document.querySelectorAll('.amount-options button');
-const customAmount = document.querySelector('#custom-amount');
-amountButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    amountButtons.forEach((item) => item.classList.remove('selected'));
-    button.classList.add('selected');
-    customAmount.value = button.dataset.amount;
-  });
-});
-
-document.querySelectorAll('[data-campaign]').forEach((link) => {
-  link.addEventListener('click', () => {
-    const campaign = document.querySelector('#donor-campaign');
-    campaign.value = link.dataset.campaign;
-  });
-});
-
 function showFormMessage(form, message, isError = false) {
   const messageElement = form.querySelector('.form-message');
   messageElement.textContent = message;
@@ -77,43 +57,44 @@ function bindDemoForm(formId, message) {
     if (!form.reportValidity()) return;
     showFormMessage(form, message);
     form.reset();
-    amountButtons.forEach((item) => item.classList.remove('selected'));
   });
 }
 
-bindDemoForm('#donation-form', 'Thank you for your support! Your donation request has been received.');
-bindDemoForm('#contact-form', 'Thank you for reaching out! We will get back to you soon.');
+const donationPanel = document.querySelector('.donate-section .form-panel');
+if (donationPanel) {
+  donationPanel.innerHTML = `
+    <div class="form-panel-top"><h3>Ways to donate</h3><span class="secure-label">HopeBridge</span></div>
+    <div style="display:grid;gap:16px;margin-top:24px">
+      <div style="padding-bottom:14px;border-bottom:1px solid var(--line)"><strong>JazzCash Account</strong><br><span style="color:var(--muted)">0300-0000000</span></div>
+      <div style="padding-bottom:14px;border-bottom:1px solid var(--line)"><strong>Easypaisa Account</strong><br><span style="color:var(--muted)">0301-0000000</span></div>
+      <div style="padding-bottom:14px;border-bottom:1px solid var(--line)"><strong>HBL Account</strong><br><span style="color:var(--muted)">HopeBridge HBL 001</span></div>
+      <div style="padding-bottom:14px;border-bottom:1px solid var(--line)"><strong>UBL Account</strong><br><span style="color:var(--muted)">HopeBridge UBL 001</span></div>
+      <div><strong>PayPal Account</strong><br><span style="color:var(--muted)">donate@hopebridge.org</span></div>
+    </div>`;
+}
+
+const contactPanel = document.querySelector('.contact-form-wrap');
+if (contactPanel) {
+  contactPanel.innerHTML = `
+    <div class="form-panel-top"><h3>Contact HopeBridge</h3><span class="secure-label">We're here to help</span></div>
+    <div style="display:grid;gap:22px;margin-top:28px">
+      <div><strong>Email address</strong><br><a href="mailto:info@hopebridge.org" style="color:var(--coral)">info@hopebridge.org</a></div>
+      <div><strong>Phone number</strong><br><a href="tel:+923001234567" style="color:var(--coral)">+92 300 1234567</a></div>
+      <div><strong>Office location</strong><br><span style="color:var(--muted)">Islamabad, Pakistan</span></div>
+    </div>`;
+}
 
 const volunteerForm = document.querySelector('#volunteer-form');
-volunteerForm?.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  if (!volunteerForm.reportValidity()) return;
-  const formData = new FormData(volunteerForm);
-  const volunteerData = {
-    name: formData.get('name'),
-    email: formData.get('email'),
-    phone: formData.get('phone'),
-    city: formData.get('city'),
-    areaOfInterest: formData.get('interest'),
-    availability: formData.get('availability')
-  };
-  const isDemoMode = !MAKE_WEBHOOK_URL || MAKE_WEBHOOK_URL.includes('PASTE_YOUR');
-  if (!isDemoMode) {
-    try {
-      const response = await fetch(MAKE_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(volunteerData)
-      });
-      if (!response.ok) throw new Error('Webhook request failed');
-    } catch (error) {
-      showFormMessage(volunteerForm, 'We could not submit your registration. Please try again.', true);
-      return;
-    }
-  }
-  showFormMessage(volunteerForm, 'Thank you for registering! Our team will contact you soon.');
-  volunteerForm.reset();
-});
+if (volunteerForm) {
+  const tallyFrame = document.createElement('iframe');
+  tallyFrame.src = 'https://tally.so/r/dWM1Bo?transparentBackground=1&hideTitle=1';
+  tallyFrame.title = 'Volunteer registration form';
+  tallyFrame.loading = 'lazy';
+  tallyFrame.style.width = '100%';
+  tallyFrame.style.minHeight = '700px';
+  tallyFrame.style.border = '0';
+  volunteerForm.replaceWith(tallyFrame);
+}
 
 document.querySelectorAll('a[href^="#"]').forEach((link) => {
   link.addEventListener('click', (event) => {
